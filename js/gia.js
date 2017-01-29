@@ -14,7 +14,15 @@ document.body.onmousedown = function(e){
         alt        = null,
         title      = null,
         dispWidth  = 0,
-        dispHeight = 0;
+        dispHeight = 0,
+        srcUrl     = null;
+    
+    if (et && et.nodeName.toLowerCase() != 'img') {
+            var images = et.getElementsByTagName("img");
+            if (images.length > 0) {
+                et = images[0];
+            }
+        }
 
     if(et && et.nodeName.toLowerCase() == 'img'){
         alt   = et.alt   ? et.alt   : alt;
@@ -22,12 +30,14 @@ document.body.onmousedown = function(e){
 
         dispWidth  = et.width;
         dispHeight = et.height;
+        srcUrl = et.src;
     }
-
+    
     chrome.extension.sendRequest({
         "alt"        : alt,
         "title"      : title,
         "dispWidth"  : dispWidth,
-        "dispHeight" : dispHeight
+        "dispHeight" : dispHeight,
+        "srcUrl"        : srcUrl
     });
 }

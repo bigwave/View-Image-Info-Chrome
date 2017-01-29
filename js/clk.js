@@ -14,12 +14,13 @@ var imgInfoObj  = {},
     title       = '--',
     altTitleStr = '--/--',
     dispWidth   = 0,
-    dispHeight  = 0;
+    dispHeight  = 0,
+    srcUrl      = null;
 
 var ciid = chrome.contextMenus.create({
 	"type"     : "normal",
 	"title"    : chrome.i18n.getMessage("contextMenuStr"),
-	"contexts" : ["image"],
+	"contexts" : ["image", "link"],
 	"onclick"  : evt
 });
 
@@ -28,7 +29,8 @@ chrome.tabs.onSelectionChanged.addListener(function(tid,info){
     title       = '--',
     altTitleStr = '--/--',
     dispWidth   = 0,
-    dispHeight  = 0;
+    dispHeight  = 0,
+    srcUrl      = null;
 });
 
 chrome.extension.onRequest.addListener(function(request){
@@ -39,11 +41,12 @@ chrome.extension.onRequest.addListener(function(request){
 
 	dispWidth  = request.dispWidth  ? request.dispWidth  : 0;
 	dispHeight = request.dispHeight ? request.dispHeight : 0;
+	srcUrl     = request.srcUrl ? request.srcUrl : 0;
 });
 
 function evt(info,tab){
 		//the location of the image
-	var imgSrc=info.srcUrl,
+	var imgSrc=info.srcUrl ? info.srcUrl : srcUrl,
 
 		//image src link type, base64 or ordinary link
 		linkType,

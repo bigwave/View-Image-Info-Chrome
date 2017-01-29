@@ -19,7 +19,7 @@ var imgInfoObj  = {},
 var ciid = chrome.contextMenus.create({
 	"type"     : "normal",
 	"title"    : chrome.i18n.getMessage("contextMenuStr"),
-	"contexts" : ["image"],
+	"contexts" : ["image","link"],
 	"onclick"  : evt
 });
 
@@ -42,23 +42,36 @@ chrome.extension.onRequest.addListener(function(request){
 });
 
 function evt(info,tab){
+	if (info.linkUrl){
+		chrome.tabs.sendMessage(tab.id, {method: "getSelection"}, 
+		function(response){
+			//alert(response.data);
+			displayPopup(response.data,tab.url);
+		});	
+	}
+	else {
 		//the location of the image
 	var imgSrc=info.srcUrl,
 
+		//url of the tab which the image embedded
+		tabUrl=tab.url;
+		
+		displayPopup(imgSrc,tabUrl);
+	}
+}
+function displayPopup(imgSrc,tabUrl){
+		//the location of the image
 		//image src link type, base64 or ordinary link
-		linkType,
+		var linkType,
 
 		//image url length, the window width will be the url length times 7
 		linkLength,
-
-		//url of the tab which the image embedded
-		tabUrl=tab.url,
 
 		//the width and height of the popup window
 		popWinWidth,
         popWinHeight;
 
-		linkType = (imgSrc.indexOf('data:image/') == 0 && imgSrc.indexOf('base64') > -1) ?
+        linkType = (imgSrc.indexOf('data:image/') == 0 && imgSrc.indexOf('base64') > -1) ?
                    "base64" : "normal";
 
         linkLength = linkType == "normal" ? imgSrc.length : 75;

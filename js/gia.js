@@ -1,5 +1,8 @@
 /*
-	@clk.js
+	@gia.js
+
+    @date: 2017-01-29
+    @version:0.0.0.5
 
     @date: 2016-10-05
     @version:0.0.0.4
@@ -9,25 +12,41 @@
 	@version:0.0.0.3
 */
 
-document.body.onmousedown = function(e){
-	var et         = e.target,
-        alt        = null,
-        title      = null,
-        dispWidth  = 0,
-        dispHeight = 0;
+chrome.extension.onMessage.addListener(function (request, sender, sendResponse) {
+    //debugger;
+    //alert('document ' + window.document)
+    //alert(request.method + " " + window.document.activeElement.getElementsByTagName("img")[0].getAttribute("src"));
+    if (request.method == "getImageInfo") {
 
-    if(et && et.nodeName.toLowerCase() == 'img'){
-        alt   = et.alt   ? et.alt   : alt;
+        var et = window.document.activeElement,
+            alt = null,
+            title = null,
+            dispWidth = 0,
+            dispHeight = 0,
+            src = null,
+            tabUrl = window.document.URL;
+
+        if (et && et.nodeName.toLowerCase() != 'img') {
+            var images = et.getElementsByTagName("img");
+            if (images.length > 0) {
+                et = images[0];
+            }
+        }
+
+        alt = et.alt ? et.alt : alt;
         title = et.title ? et.title : title;
-
-        dispWidth  = et.width;
+        dispWidth = et.width;
         dispHeight = et.height;
-    }
+        src = et.src;
 
-    chrome.extension.sendRequest({
-        "alt"        : alt,
-        "title"      : title,
-        "dispWidth"  : dispWidth,
-        "dispHeight" : dispHeight
-    });
-}
+        sendResponse({
+            "alt": alt,
+            "title": title,
+            "dispWidth": dispWidth,
+            "dispHeight": dispHeight,
+            "srcUrl": src,
+            "tabUrl": tabUrl
+        });
+    } else
+        sendResponse({}); // snub them.
+});

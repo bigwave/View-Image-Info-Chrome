@@ -9,9 +9,8 @@
         "128":"img/icon-128.png"
     },
     "content_scripts":[{
-        "js":["js/getDOM.js"],
-		"matches":["http://*/*","https://*/*"],
-        "run_at": "document_start",
+        "js":["js/gia.js"],
+        "matches":["http://*/*","https://*/*"],
         "all_frames":true
     }],
     "permissions":[

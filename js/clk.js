@@ -9,92 +9,85 @@
 	@version:0.0.0.6
 */
 
-var imgInfoObj  = {},
-    alt         = '--',
-    title       = '--',
-    altTitleStr = '--/--',
-    dispWidth   = 0,
-    dispHeight  = 0;
+var imgInfoObj = {},
+	alt = '--',
+	title = '--',
+	altTitleStr = '--/--',
+	dispWidth = 0,
+	dispHeight = 0;
 
 var ciid = chrome.contextMenus.create({
-	"type"     : "normal",
-	"title"    : chrome.i18n.getMessage("contextMenuStr"),
-	"contexts" : ["image","link"],
-	"onclick"  : evt
+	"type": "normal",
+	"title": chrome.i18n.getMessage("contextMenuStr"),
+	"contexts": ["image", "link"],
+	"onclick": evt
 });
 
-chrome.tabs.onSelectionChanged.addListener(function(tid,info){
-    alt         = '--',
-    title       = '--',
-    altTitleStr = '--/--',
-    dispWidth   = 0,
-    dispHeight  = 0;
+chrome.tabs.onSelectionChanged.addListener(function (tid, info) {
+	alt = '--',
+		title = '--',
+		altTitleStr = '--/--',
+		dispWidth = 0,
+		dispHeight = 0;
 });
 
-chrome.extension.onRequest.addListener(function(request){
+chrome.extension.onRequest.addListener(function (request) {
 
-	alt         = request.alt   ? request.alt   : '--';
-	title       = request.title ? request.title : '--';
-    altTitleStr = alt + ' / ' + title;
-
-	dispWidth  = request.dispWidth  ? request.dispWidth  : 0;
-	dispHeight = request.dispHeight ? request.dispHeight : 0;
 });
 
-function evt(info,tab){
-	if (info.linkUrl){
-		chrome.tabs.sendMessage(tab.id, {method: "getSelection"}, 
-		function(response){
-			//alert(response.data);
-			displayPopup(response.data,tab.url);
-		});	
-	}
-	else {
-		//the location of the image
-	var imgSrc=info.srcUrl,
+function evt(info, tab) {
+	chrome.tabs.sendMessage(tab.id, {
+			method: "getImageInfo"
+		},
+		function (response) {
+			alt = response.alt ? response.alt : '--';
+			title = response.title ? response.title : '--';
+			altTitleStr = alt + ' / ' + title;
 
-		//url of the tab which the image embedded
-		tabUrl=tab.url;
-		
-		displayPopup(imgSrc,tabUrl);
-	}
-}
-function displayPopup(imgSrc,tabUrl){
-		//the location of the image
-		//image src link type, base64 or ordinary link
-		var linkType,
+			dispWidth = response.dispWidth ? response.dispWidth : 0;
+			dispHeight = response.dispHeight ? response.dispHeight : 0;
 
-		//image url length, the window width will be the url length times 7
-		linkLength,
+			//the location of the image
+			var imgSrc = response.srcUrl,
 
-		//the width and height of the popup window
-		popWinWidth,
-        popWinHeight;
+				//image src link type, base64 or ordinary link
+				linkType,
 
-        linkType = (imgSrc.indexOf('data:image/') == 0 && imgSrc.indexOf('base64') > -1) ?
-                   "base64" : "normal";
+				//image url length, the window width will be the url length times 7
+				linkLength,
 
-        linkLength = linkType == "normal" ? imgSrc.length : 75;
+				//url of the tab which the image embedded
+				tabUrl = response.tabUrl,
 
-		popWinWidth = linkLength < 75 ? linkLength * 8 + 100 : 800;
-		popWinHeight = 220;
+				//the width and height of the popup window
+				popWinWidth,
+				popWinHeight;
 
-		chrome.windows.create({
-            "type"   : "popup",
-            "url"    : "view/vii.html",
-            "width"  : popWinWidth,
-            "height" : popWinHeight
-        });
+			linkType = (imgSrc.indexOf('data:image/') == 0 && imgSrc.indexOf('base64') > -1) ?
+				"base64" : "normal";
 
-		imgInfoObj={
-            "imgSrc"        :imgSrc,
-            "linkType"      :linkType,
-            "tabUrl"        :tabUrl,
-            "popWinWidth"   :popWinWidth,
-            "popWinHeight"  :popWinHeight,
-            "linkLength"    :linkLength,
-            "altTitleStr"   :altTitleStr,
-            "dispWidth"     :dispWidth,
-            "dispHeight"    :dispHeight
-        };
+			linkLength = linkType == "normal" ? imgSrc.length : 75;
+
+			popWinWidth = linkLength < 75 ? linkLength * 8 + 100 : 800;
+			popWinHeight = 220;
+
+			chrome.windows.create({
+				"type": "popup",
+				"url": "view/vii.html",
+				"width": popWinWidth,
+				"height": popWinHeight
+			});
+
+			imgInfoObj = {
+				"imgSrc": imgSrc,
+				"linkType": linkType,
+				"tabUrl": tabUrl,
+				"popWinWidth": popWinWidth,
+				"popWinHeight": popWinHeight,
+				"linkLength": linkLength,
+				"altTitleStr": altTitleStr,
+				"dispWidth": dispWidth,
+				"dispHeight": dispHeight
+			};
+	});
 }
